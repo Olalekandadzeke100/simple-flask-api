@@ -1,0 +1,41 @@
+---
+- name: Configure EC2 for App Deployment
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Docker, Docker Compose, Python, pip, Git
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - python3
+          - python3-pip
+          - git
+        state: present
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Create app directory structure
+      file:
+        path: /opt/myapp
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
