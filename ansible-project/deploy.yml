@@ -31,11 +31,29 @@
         groups: docker
         append: yes
 
-    - name: Create app directory structure
+    - name: Create app directory
       file:
         path: /opt/myapp
         state: directory
         owner: ubuntu
         group: ubuntu
         mode: '0755'
+
+    - name: Clone the Flask app repository
+      git:
+        repo: https://github.com/Olalekandadzeke100/simple-flask-api.git
+        dest: /opt/myapp
+        force: yes
+
+    - name: Build Docker image
+      shell: docker build -t flask-login-app /opt/myapp
+
+    - name: Stop and remove existing container (if running)
+      shell: |
+        docker stop flask-app || true
+        docker rm flask-app || true
+
+    - name: Run the new container
+      shell: |
+        docker run -d --name flask-app -p 5000:5000 flask-login-app
 
